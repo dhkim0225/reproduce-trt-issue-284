@@ -1,0 +1,31 @@
+FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
+
+ARG ONNX_VER=1.6.0
+ARG TRT_DEB_FILE=nv-tensorrt-repo-ubuntu1804-cuda10.2-trt7.0.0.11-ga-20191216_1-1_amd64.deb
+ARG APT_KEY_FILE=/var/nv-tensorrt-repo-cuda10.2-trt7.0.0.11-ga-20191216/7fa2af80.pub
+###########################################
+## update & install packages
+###########################################
+SHELL ["/bin/bash", "-c"]
+
+RUN apt-get -qq update && \
+    apt-get -qq install -y curl wget vim htop git software-properties-common unzip zip unrar rar cmake gfortran && \
+    apt-get -qq install -y build-essential libfreetype6-dev libhdf5-serial-dev libzmq3-dev pkg-config libsm6 libxext6 libxrender-dev
+
+###########################################
+## Install python 3.6
+###########################################
+RUN apt-get -qq update && \
+    apt-get -qq install -y python3 python3-pip
+
+###########################################
+## Install TensorRT 7.0.0
+###########################################
+COPY ${TRT_DEB_FILE} /tmp/${TRT_DEB_FILE}
+RUN dpkg -i /tmp/${TRT_DEB_FILE}
+RUN apt-key add ${APT_KEY_FILE}
+RUN apt-get -qq update && \
+    apt-get -qq install -y tensorrt python3-libnvinfer-dev
+
+RUN python3.6 -m pip install onnx==${ONNX_VER} && \
+    python3.6 -m pip install numpy
