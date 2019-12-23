@@ -23,6 +23,8 @@ def get_engine(onnx_file_path, mode):
                 print(parser.get_error(error))
 
         print(len(network))
+        for i in range(len(network)):
+            print(network[i].type)
 
         engine = builder.build_cuda_engine(network)
 
